@@ -17,6 +17,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+//Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// 取得 CSRF token
+Route::get('/csrf', [App\Http\Controllers\HomeController::class, 'csrf']);
