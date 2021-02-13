@@ -23,3 +23,6 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 // 取得 CSRF token
 Route::get('/csrf', [App\Http\Controllers\HomeController::class, 'csrf']);
+
+// 使用者註冊
+Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'createUser']);

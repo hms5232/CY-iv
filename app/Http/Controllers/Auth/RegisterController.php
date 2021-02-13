@@ -7,7 +7,10 @@ use App\Providers\RouteServiceProvider;
 use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
@@ -69,5 +72,39 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    /**
+     * User register
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createUser(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $credentials = $request->only('name', 'email', 'password');
+
+        // 驗證資料格式
+        $validator = Validator::make($credentials, [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users',
+            'password' => 'required|string|min:6'
+        ]);
+        if ($validator->fails()) {
+            $messages = $validator->errors()->all();
+            return response()->json(compact('messages'), 400);
+        }
+
+        DB::transaction(function () use ($credentials){
+            // 新增使用者
+            User::create([
+                'name' => $credentials['name'],
+                'email' => $credentials['email'],
+                'password' => Hash::make($credentials['password']),
+            ]);
+        });
+
+        $messages = array('註冊成功');
+        return response()->json(compact('messages'), 200);
     }
 }
