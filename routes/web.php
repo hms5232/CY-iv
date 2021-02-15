@@ -26,3 +26,6 @@ Route::get('/csrf', [App\Http\Controllers\HomeController::class, 'csrf']);
 
 // 使用者註冊
 Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, 'createUser']);
+
+// 登出
+Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']);
