@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -60,5 +61,19 @@ class LoginController extends Controller
         $request->session()->regenerateToken();  // manually regenerate the session ID
 
         return response()->json(['messages' => ['Logged Out!']], 200);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Facebook Login
+    |--------------------------------------------------------------------------
+    */
+    public function fbLogin(Request $request)
+    {
+        $redirect_url = Socialite::driver('facebook')
+            ->scopes(['email'])  // https://developers.facebook.com/docs/permissions/reference
+            ->redirect()->getTargetUrl();
+
+        return response()->json(['target' => [$redirect_url]], 302);  // 前端 window.postMessage 來開
     }
 }

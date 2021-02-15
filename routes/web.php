@@ -29,3 +29,6 @@ Route::post('/register', [App\Http\Controllers\Auth\RegisterController::class, '
 
 // 登出
 Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logout']);
+
+// FB 登入
+Route::get('fb-login', [App\Http\Controllers\Auth\LoginController::class, 'fbLogin']);
