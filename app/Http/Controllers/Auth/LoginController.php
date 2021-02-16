@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -75,5 +77,50 @@ class LoginController extends Controller
             ->redirect()->getTargetUrl();
 
         return response()->json(['target' => [$redirect_url]], 302);  // 前端 window.postMessage 來開
+    }
+
+    public function fbLoginCallback(Request $request)
+    {
+        if (is_null($request['code']) || is_null($request['state'])){
+            return response()->json(['messages' => ['授權失敗']], 401);
+        }
+
+        Session::put('state', $request['state']);  // 不寫入 session 就要 stateless
+
+        try{
+            $fb_user = Socialite::driver('facebook')->user();
+        } catch (\Exception $exception){
+            Log::error($exception);
+            return response()->json(['messages' => [strval($exception)]], 401);
+        }
+
+        // 確認使用者是否已經使用此方法註冊過
+        if (User::where('facebook_id', $fb_user->getId())->exists()){  // 有
+            // 登入
+            Auth::guard('web')->login(User::where('facebook_id', $fb_user->getId())->first());
+        } else if (User::where('email', $fb_user->getEmail())->exists()){  // 有相同 email 的使用者
+            // 更新使用者資料
+            DB::transaction(function () use ($fb_user){
+                User::where('email', $fb_user->getEmail())->update([
+                    'facebook_id' => $fb_user->getId()
+                ]);
+            });
+
+            Auth::guard('web')->login(User::where('email', $fb_user->getEmail())->first());
+        }else {  // 沒找到
+            // 自動註冊
+            DB::transaction(function () use ($fb_user){
+                User::create([
+                    'name' => $fb_user->getName(),
+                    'email' => $fb_user->getEmail(),
+                    'password' => Hash::make(uniqid('FB_')),
+                    'facebook_id' => $fb_user->getId()
+                ]);
+            });
+
+            Auth::guard('web')->login(User::where('email', $fb_user->getEmail())->where('facebook_id', $fb_user->getId())->first());
+        }
+
+        return response()->json(['messages' => ['登入成功！']], 200);
     }
 }

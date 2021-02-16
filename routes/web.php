@@ -32,3 +32,6 @@ Route::post('/logout', [App\Http\Controllers\Auth\LoginController::class, 'logou
 
 // FB 登入
 Route::get('fb-login', [App\Http\Controllers\Auth\LoginController::class, 'fbLogin']);
+
+// FB 登入 callback
+Route::get('fb-login-callback', [App\Http\Controllers\Auth\LoginController::class, 'fbLoginCallback']);
