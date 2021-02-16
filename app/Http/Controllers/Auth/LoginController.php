@@ -152,4 +152,18 @@ class LoginController extends Controller
 
         return response()->json(['messages' => ['登入成功！']], 200);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Check user status
+    |--------------------------------------------------------------------------
+    */
+    public function authCheck(Request $request)
+    {
+        if (Auth::check()){
+            return response()->json(['messages' => ['已登入']], 200);
+        } else {
+            return response()->json(['messages' => ['未登入']], 401);
+        }
+    }
 }

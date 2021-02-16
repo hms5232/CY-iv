@@ -38,3 +38,6 @@ Route::get('fb-login', [App\Http\Controllers\Auth\LoginController::class, 'fbLog
 
 // FB 登入 callback
 Route::get('fb-login-callback', [App\Http\Controllers\Auth\LoginController::class, 'fbLoginCallback']);
+
+// 確認使用者是否登入
+Route::get('status', [App\Http\Controllers\Auth\LoginController::class, 'authCheck']);
