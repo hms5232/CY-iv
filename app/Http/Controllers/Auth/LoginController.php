@@ -67,6 +67,35 @@ class LoginController extends Controller
 
     /*
     |--------------------------------------------------------------------------
+    | Normal Login
+    |--------------------------------------------------------------------------
+    */
+    public function login(Request $request)
+    {
+        // grab credentials from the request
+        $credentials = $request->only('email', 'password');
+
+        $validator = Validator::make($credentials, [
+            'email' => 'required|email',
+            'password' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['messages' => ['輸入錯誤']], 400);
+        }
+
+        // 注意：密碼不要雜湊，框架在傳遞參數比對資料時會自動雜湊
+        if (Auth::attempt($credentials)){
+            $request->session()->regenerate();
+
+            return response()->json(['messages' => ['登入成功']], 200);
+        }
+
+        return response()->json(['messages' => ['登入失敗']], 403);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Facebook Login
     |--------------------------------------------------------------------------
     */
